@@ -1,6 +1,17 @@
 
-#include "/Users/kwezimayikana/Desktop/minilibx/mlx.h"
+//#include "/Users/kwezimayikana/Desktop/minilibx/mlx.h"
+#include <mlx.h>
 #include <stdio.h>
+
+unsigned long createRGB(int r, int g, int b)
+{   
+    return ((r & 0xff) << 16) + ((g & 0xff) << 8) + (b & 0xff);
+}
+
+unsigned long color(int c)
+{
+	return (createRGB(c,c,c));
+}
 
 int     main(void)
 {
@@ -9,8 +20,8 @@ int     main(void)
     void    *mlx;
     void    *win;
     void    *image;
-    double fragcoord_x = 300;
-    double fragcoord_y = 300;
+    // double fragcoord_x = 300;
+    // double fragcoord_y = 300;
     int     *image_data;
     int     i,j,k;
     mlx = mlx_init();
@@ -34,15 +45,17 @@ int     main(void)
     // double p_y = 0;
     // double p_z = 0;
     // double dist = dist_line(ro, rd, p);
-    int x;
+    int x, y;
     x = 0;
+	y = 1;
     int p = x;
     int m = (width * height);
     while (p < m)
     {
-            image_data[p] = 0xF0FF00;
-            p++;
-            x++;
+		image_data[p] = color(y/2950);
+		p++;
+		x++;
+		y++;
            // mlx_pixel_put(mlx, win, x++,y , 0xFFFFFF);
     }
     mlx_put_image_to_window(mlx, win, image, 0,0);

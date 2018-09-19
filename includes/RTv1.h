@@ -1,7 +1,7 @@
 #ifndef RTV1_H
 #define RTV1_H
-//#include "/Users/kwezimayikana/Desktop/minilibx/mlx.h"
-#include <mlx.h>
+#include "/Users/kwezimayikana/Desktop/minilibx/mlx.h"
+//#include <mlx.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -22,6 +22,9 @@ typedef struct			s_ray
 	float ray_direction_x;
 	float ray_direction_y;
 	float ray_direction_z;
+	float	line_seg_x;
+	float	line_seg_y;
+	float	line_seg_z;
 
 }						t_ray;
 

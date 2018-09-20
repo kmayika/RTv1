@@ -9,8 +9,8 @@ all: $(NAME)
 
 $(NAME): $(OBJ)
 	#make -C libft all
-	$(CC) -g -o $(NAME) $(OBJ) $(FLAGS) -I minilibx_macos /Users/kwezimayikana/minilibx/libmlx.a -framework OpenGL -framework AppKit #-L libft -lft
-
+	$(CC) -g -o $(NAME) $(OBJ) $(FLAGS) -I minilibx_macos -lmlx -framework OpenGL -framework AppKit #-L libft -lft
+	# /Users/kwezimayikana/minilibx/libmlx.a
  %.o: %.c
 	$(CC) -c -o $@ $(FLAGS) $^
 

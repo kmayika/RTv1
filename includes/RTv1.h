@@ -1,9 +1,10 @@
 #ifndef RTV1_H
 #define RTV1_H
-//#include "/Users/kwezimayikana/Desktop/minilibx/mlx.h"
-#include <mlx.h>
+#include "/Users/kwezimayikana/Desktop/minilibx/mlx.h"
+//#include <mlx.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 
 typedef struct			s_sphere
@@ -13,6 +14,11 @@ typedef struct			s_sphere
 	float center_y;
 	float center_z;
 	float rad_sqrt;
+	float dist_to_int;
+	float near_intercept;
+	float far_intercept;
+	float thickness;
+
 }						t_sphere;
 
 typedef struct			s_ray
@@ -39,6 +45,8 @@ typedef struct			s_vec
 	unsigned int		width;
 	float				field_of_view;
 	float				field_of_view_angle;
+	float				light_pos;
+	float				light;
 
     void    *mlx;
     void    *win;

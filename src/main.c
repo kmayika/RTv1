@@ -63,6 +63,14 @@ void	is_intercect(t_vec *uv)
 	float pythagoras = dot_product(uv);
 	uv->ray.opp_side = (pythagoras - (adjacent_length * adjacent_length));
 
+	uv->sphere.thickness = (uv->sphere.radius * uv->sphere.radius) - uv->ray.opp_side;
+	uv->sphere.near_intercept = adjacent_length - uv->sphere.thickness;
+	uv->sphere.far_intercept = adjacent_length + uv->sphere.thickness;
+	// if (uv->sphere.near_intercept < 0 && uv->sphere.far_intercept < 0)
+	uv->sphere.thickness = (uv->sphere.near_intercept < uv->sphere.far_intercept) ? uv->sphere.near_intercept : uv->sphere.far_intercept;
+	
+	//light pos;
+	uv->light = uv->light_pos - uv->sphere.near_intercept;
 }
 
 void	ray_trace_init(t_vec *uv)
@@ -112,11 +120,16 @@ void	render(t_vec *uv)
 	}
 }
 
+int	exit_code(void)
+{
+	write (1, "bye\n", 4);
+	exit(1);
+}
 int		keyhooks(int key, t_vec *uv)
 {
 	if (key == 53)
 	{
-		exit (1);
+		exit_code();
 	}
 	if (key == 126)
 	{
@@ -148,5 +161,6 @@ int     main(void)
     // mlx_put_image_to_window(mlx, win, image, 0,0);
     // mlx_destroy_image(mlx, (char *)image);
 	mlx_hook(uv->win,2,0, keyhooks, uv);
+	mlx_hook(uv->win,17,0, exit_code, uv);
     mlx_loop(uv->mlx);
 }

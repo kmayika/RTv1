@@ -17,6 +17,7 @@ float	length_vec(t_vec *uv)
 
 void	normalize_vec(t_vec *uv)
 {
+	//normalize by diving vector with magnitude of vector ||v|| = sqrt(x2 + y2 + z2)
 	uv->ray.ray_direction_x /= length_vec(uv);
 	uv->ray.ray_direction_y /= length_vec(uv);
 	uv->ray.ray_direction_z /= length_vec(uv);
@@ -27,6 +28,12 @@ void	create_primary_ray(t_vec *uv)
 {
 	if (uv->width > uv->height)
 	{
+
+		/*(float)uv->x + 0.5) makes sure ray passes in the centre of pixel (assuming pixels are 1 unit by 1 unit),
+			divide this by width to normalise it to screen (width,height) to fit and multiply by 2 and minus 1 so that 
+			it stays between the 2x2 unit screen we imagined
+			multiply by aspect ratio for rendered image to stay the same shape regardless  of screen width and height
+			multiply by  FOV for zoom in and out*/
 		uv->field_of_view = tan((uv->field_of_view_angle * M_PI/180)/2);
 		float	aspect_ratio = ((float)uv->width) / ((float)uv->height);
 		float	screen_x = (((((float)uv->x + 0.5)/ (float)uv->width) * 2.0 - 1.0) * aspect_ratio) * uv->field_of_view;
@@ -34,14 +41,17 @@ void	create_primary_ray(t_vec *uv)
 
 		uv->ray.ray_direction_x = screen_x;
 		uv->ray.ray_direction_y = screen_y;
+		// all our primary rays go forward from "camera---screen----environment" that's why z = -1
 		uv->ray.ray_direction_z = -1.0;
 	}
+	//vectors remain less than 1
 	normalize_vec(uv);
 
 }
 
 float	dot_product_line_seg(t_vec *uv)
 {
+	//ray direction already has angle
 	float a = (uv->ray.line_seg_x * uv->ray.ray_direction_x) + (uv->ray.line_seg_y * uv->ray.ray_direction_y) + (uv->ray.line_seg_z * uv->ray.ray_direction_z);
 	return (a);
 
@@ -55,22 +65,17 @@ float	dot_product(t_vec *uv)
 
 void	is_intercect(t_vec *uv)
 {
+	/*create a line segment between the ray origin to center of sphere (x,y,z)
+		adjacent side is primary ray from camera */
 	uv->ray.line_seg_x = uv->sphere.center_x - uv->ray.ray_origin_x;
 	uv->ray.line_seg_y = uv->sphere.center_y - uv->ray.ray_origin_y;
 	uv->ray.line_seg_z = uv->sphere.center_z - uv->ray.ray_origin_z;
-	float	adjacent_length;
-	adjacent_length = dot_product_line_seg(uv);
+	uv->ray.adjacent_length = dot_product_line_seg(uv);
+	//pythagoras for hypotenuse x2 + y2 + x2
 	float pythagoras = dot_product(uv);
-	uv->ray.opp_side = (pythagoras - (adjacent_length * adjacent_length));
+	//if opposite is bigger than raduis, then no intercept and vice versa
+	uv->ray.opp_side = (pythagoras - (uv->ray.adjacent_length * uv->ray.adjacent_length));
 
-	uv->sphere.thickness = (uv->sphere.radius * uv->sphere.radius) - uv->ray.opp_side;
-	uv->sphere.near_intercept = adjacent_length - uv->sphere.thickness;
-	uv->sphere.far_intercept = adjacent_length + uv->sphere.thickness;
-	// if (uv->sphere.near_intercept < 0 && uv->sphere.far_intercept < 0)
-	uv->sphere.thickness = (uv->sphere.near_intercept < uv->sphere.far_intercept) ? uv->sphere.near_intercept : uv->sphere.far_intercept;
-	
-	//light pos;
-	uv->light = uv->light_pos - uv->sphere.near_intercept;
 }
 
 void	ray_trace_init(t_vec *uv)
@@ -79,10 +84,12 @@ void	ray_trace_init(t_vec *uv)
 	uv->height = 750;
     uv->mlx = mlx_init();
     uv->win = mlx_new_window(uv->mlx, uv->width, uv->height, "RT");
+	//rendered scenes, must make input file for these
 	uv->sphere.center_x = 0;
 	uv->sphere.center_y = 0;
-	uv->sphere.center_z = 5;
+	uv->sphere.center_z = -5;
 	uv->sphere.radius = 5;
+	//primary rays so these can be altered to change cam position
 	uv->ray.ray_origin_x = 0;
 	uv->ray.ray_origin_y = 0;
 	uv->ray.ray_origin_z = 0;
@@ -100,7 +107,7 @@ void	render(t_vec *uv)
 		uv->x = 0;
 		while (uv->x < uv->width)
 		{
-			//shoot primary ray
+			//shoot primary ray from camera--------------"hit pixel"
 			create_primary_ray(uv);
 			is_intercect(uv);
 
@@ -120,25 +127,36 @@ void	render(t_vec *uv)
 	}
 }
 
-int	exit_code(void)
+int		exit_prog(void)
 {
-	write (1, "bye\n", 4);
-	exit(1);
+	exit (1);
 }
+
 int		keyhooks(int key, t_vec *uv)
 {
 	if (key == 53)
 	{
-		exit_code();
+		exit_prog();
 	}
 	if (key == 126)
 	{
-		uv->field_of_view_angle -= 5;
+		uv->field_of_view_angle -= 2;
 	}
 
 	if (key == 125)
 	{
-		uv->field_of_view_angle += 5;
+		uv->field_of_view_angle += 2;
+	}
+
+	if (key == 123)
+	{
+		uv->sphere.center_x -= 1;
+		uv->sphere.center_y -= 1;
+	}
+	if (key == 124)
+	{
+		uv->sphere.center_x += 1;
+		uv->sphere.center_y += 1;
 	}
 	mlx_clear_window(uv->mlx, uv->win);
 	render(uv);
@@ -161,6 +179,6 @@ int     main(void)
     // mlx_put_image_to_window(mlx, win, image, 0,0);
     // mlx_destroy_image(mlx, (char *)image);
 	mlx_hook(uv->win,2,0, keyhooks, uv);
-	mlx_hook(uv->win,17,0, exit_code, uv);
+	mlx_hook(uv->win,17,0, exit_prog, uv);
     mlx_loop(uv->mlx);
 }

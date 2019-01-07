@@ -56,7 +56,7 @@ int     main(void)
 		p++;
 		x++;
 		y++;
-           // mlx_pixel_put(mlx, win, x++,y , 0xFFFFFF);
+        mlx_pixel_put(mlx, win, x,y , 0xFFFFFF);
     }
     mlx_put_image_to_window(mlx, win, image, 0,0);
     mlx_destroy_image(mlx, (char *)image);
